@@ -6,17 +6,18 @@
 import { GoogleGenAI } from "@google/genai";
 
 const getApiKey = () => {
-  // Try different ways to get the key (environment, vite meta, etc)
+  // Always prioritize the environment variable provided by the platform
   return process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
 };
 
 const ai = new GoogleGenAI({ apiKey: getApiKey() });
 
 export const solveMathProblem = async (problem: string, imageBase64?: string) => {
-  if (!getApiKey()) {
-    return "يا بطل، شكلك نسيت تضيف مفتاح الـ API (GEMINI_API_KEY) في إعدادات الموقع. ضيفه وارجع جرب، رح تلاقي الرياضيات أسهل من قلي البيضة!";
-  }
   try {
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      throw new Error("Missing API Key");
+    }
     const parts: any[] = [{ text: `أنت "الأستاذ مصعب"، مدرس رياضيات فلسطيني "نهفة" وكوميدي جداً وبحب طلابه لدرجة مش طبيعية.
     قم بحل المسألة التالية. 
     **مهم جداً (تعليمات الشخصية واللغة)**: 

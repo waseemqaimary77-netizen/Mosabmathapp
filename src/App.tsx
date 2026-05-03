@@ -13,6 +13,8 @@ import Calculator from './pages/Calculator';
 import StudySchedule from './pages/StudySchedule';
 import Achievements from './pages/Achievements';
 import FormulaSheet from './pages/FormulaSheet';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 export default function App() {
   return (
@@ -27,6 +29,8 @@ export default function App() {
             <Route path="/schedule" element={<StudySchedule />} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/formulas" element={<FormulaSheet />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
           </Routes>
         </Layout>
       </Router>
