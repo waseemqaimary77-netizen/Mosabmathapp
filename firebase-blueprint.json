@@ -1,0 +1,26 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Progression",
+      "description": "Tracks student XP, level, and solved problems",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "xp": { "type": "integer" },
+        "level": { "type": "integer" },
+        "badges": { "type": "array", "items": { "type": "string" } },
+        "solvedCount": { "type": "integer" },
+        "quizScores": { "type": "object" },
+        "lastDailyChallenge": { "type": "string", "format": "date" },
+        "streak": { "type": "integer" }
+      },
+      "required": ["uid", "xp", "level", "badges", "solvedCount"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile and progress data"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "أستاذ مصعب",
+  "description": "مساعد ذكي لمادة الرياضيات - تعلم الرياضيات مع الأستاذ مصعب بأسلوب تفاعلي وحديث.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
