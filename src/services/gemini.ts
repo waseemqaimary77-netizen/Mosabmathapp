@@ -5,8 +5,25 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const getApiKey = () => {
-  return process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+export const getApiKey = () => {
+  return (
+    process.env.GEMINI_API_KEY ||
+    (import.meta as any).env?.VITE_GEMINI_API_KEY ||
+    localStorage.getItem('mosaab_gemini_api_key') ||
+    ''
+  );
+};
+
+export const setCustomApiKey = (key: string) => {
+  if (key) {
+    localStorage.setItem('mosaab_gemini_api_key', key.trim());
+  } else {
+    localStorage.removeItem('mosaab_gemini_api_key');
+  }
+};
+
+export const hasApiKey = () => {
+  return !!getApiKey();
 };
 
 const getGenAI = () => {
