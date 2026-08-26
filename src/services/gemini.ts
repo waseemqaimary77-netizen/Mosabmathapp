@@ -30,11 +30,6 @@ const getGenAI = () => {
   const apiKey = getApiKey();
   return new GoogleGenAI({
     apiKey: apiKey || 'dummy-key',
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      }
-    }
   });
 };
 
@@ -49,47 +44,101 @@ const PROF_MOSAAB_SYSTEM_INSTRUCTION = `أنت "الأستاذ مصعب فشاف
 6. اختم دائماً بنصيحة ذهبية أو حكمة فكاهية من "الأستاذ مصعب".`;
 
 const MODELS_CASCADE = [
-  "gemini-flash-latest",
-  "gemini-3.1-flash-lite",
-  "gemini-3.7-flash",
-  "gemini-3.1-pro-preview"
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.0-flash-lite"
 ];
 
 const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
 
+async function callDirectRestApi(apiKey: string, model: string, payload: any) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    const errorMsg = data?.error?.message || `HTTP ${response.status} ${response.statusText}`;
+    throw new Error(errorMsg);
+  }
+
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  return text || '';
+}
+
 async function generateWithCascade(ai: any, contents: any, config: any = {}) {
   let lastError: any = null;
+  const apiKey = getApiKey();
 
   for (const model of MODELS_CASCADE) {
-    // Attempt up to 2 times per model if 503 / 429
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const response = await ai.models.generateContent({
-          model,
-          contents,
-          config,
-        });
-        if (response && response.text) {
-          return response.text;
-        }
-      } catch (err: any) {
-        lastError = err;
-        const errMsg = err?.message || String(err);
-        const isTransient = errMsg.includes('503') || errMsg.includes('UNAVAILABLE') || errMsg.includes('high demand') || errMsg.includes('429') || errMsg.includes('RESOURCE_EXHAUSTED');
-        
-        console.warn(`Model ${model} attempt ${attempt + 1} failed (${errMsg}).`);
-        
-        if (isTransient) {
-          await sleep(attempt === 0 ? 500 : 1000);
-        } else {
-          // If non-transient, switch to next model immediately
-          break;
+    try {
+      // 1. Try SDK call
+      const response = await ai.models.generateContent({
+        model,
+        contents,
+        config,
+      });
+      if (response && response.text) {
+        return response.text;
+      }
+    } catch (err: any) {
+      lastError = err;
+      const errMsg = err?.message || String(err);
+      console.warn(`SDK with ${model} failed (${errMsg}), trying REST direct fetch...`);
+
+      // 2. Direct REST fallback for browser compatibility
+      if (apiKey) {
+        try {
+          let restPayload: any = {};
+          if (contents?.parts) {
+            restPayload = {
+              contents: [{
+                parts: contents.parts.map((p: any) => {
+                  if (p.inlineData) {
+                    return {
+                      inline_data: {
+                        mime_type: p.inlineData.mimeType,
+                        data: p.inlineData.data
+                      }
+                    };
+                  }
+                  return { text: p.text };
+                })
+              }]
+            };
+          } else if (typeof contents === 'string') {
+            restPayload = {
+              contents: [{ parts: [{ text: contents }] }]
+            };
+          }
+
+          if (config?.responseMimeType === 'application/json') {
+            restPayload.generationConfig = {
+              responseMimeType: 'application/json',
+              temperature: config.temperature || 0.7
+            };
+          }
+
+          const restText = await callDirectRestApi(apiKey, model, restPayload);
+          if (restText) {
+            return restText;
+          }
+        } catch (restErr: any) {
+          lastError = restErr;
+          console.warn(`Direct REST with ${model} failed (${restErr?.message})`);
         }
       }
     }
   }
 
-  throw lastError || new Error("All models are currently busy.");
+  throw lastError || new Error("تعذر الاتصال بالذكاء الاصطناعي");
 }
 
 export const solveMathProblem = async (problem: string, imageBase64?: string) => {
@@ -130,13 +179,16 @@ ${problem || 'قم بحل وتحليل المسألة الموجودة في ال
   } catch (error: any) {
     console.error("Gemini Error", error);
     const msg = error?.message || '';
+    if (msg.includes('API_KEY_INVALID') || msg.includes('API key not valid') || msg.includes('403') || msg.includes('Forbidden')) {
+      return "🛑 **الأستاذ مصعب بحكيلك**: مفتاح الـ API غير صالح أو غير مفعل! اضغط على أيقونة المفتاح 🔑 في نافذة المحادثة والصق المفتاح الصحيح من Google AI Studio.";
+    }
     if (msg.includes('503') || msg.includes('UNAVAILABLE') || msg.includes('high demand')) {
       return "🛑 **الأستاذ مصعب بحكيلك**: ولك السيرفر عليه ضغط عالي وطوابير طلاب زي يوم نتائج التوجيهي! 😅 انتظر 5 ثواني واضغط (أوجد الحل) مرة تانية يا بطل!";
     }
     if (msg.includes('429') || error?.status === 'RESOURCE_EXHAUSTED' || msg.includes('quota')) {
-      return "🛑 **الأستاذ مصعب بحكيلك**: ولك من كتر الأسئلة والضغط مخي صار يغلي! استنى 15 ثانية وارجع اسألني يا بطل، لا تصير مستعجل زي أكرم!";
+      return "🛑 **الأستاذ مصعب بحكيلك**: ولك من كتر الأسئلة والضغط خلص الكوتا المؤقتة! استنى دقيقة وارجع اسألني يا بطل، لا تصير مستعجل زي أكرم!";
     }
-    return "عذراً يا زلمة! صار خلل فني بسيط أثناء تحليل المسألة بسبب ضغط الشبكة. اضغط على الزر وجرب كمان مرة يا وحش!";
+    return `عذراً يا زلمة! صار خلل فني أثناء تحليل المسألة (${msg.slice(0, 60)}...). تأكد من الاتصال بالإنترنت وجرب كمان مرة يا وحش!`;
   }
 };
 
