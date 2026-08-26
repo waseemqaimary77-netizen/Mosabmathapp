@@ -24,7 +24,14 @@ export const signInWithGoogle = async () => {
   }
 };
 
-export const logout = () => signOut(auth);
+export const logout = async () => {
+  localStorage.removeItem('mosaab_guest_user');
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.warn("SignOut error:", e);
+  }
+};
 
 // Helper for generic Firestore operations with error handling
 export enum OperationType {

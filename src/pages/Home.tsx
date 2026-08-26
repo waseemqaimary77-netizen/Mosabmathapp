@@ -13,7 +13,10 @@ import {
   ChevronLeft,
   Star,
   Zap,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
+  BookOpen,
+  Award
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -21,10 +24,10 @@ import Mascot from '../components/Mascot';
 import { MATH_QUOTES } from '../constants';
 
 const QUICK_ACTIONS = [
-  { label: 'حل سؤال', path: '/solve', icon: HelpCircle, color: 'bg-blue-500', desc: 'صور أو اكتب سؤالك' },
-  { label: 'اختبار سريع', path: '/quiz', icon: BrainCircuit, color: 'bg-purple-500', desc: 'تحدى نفسك الآن' },
-  { label: 'آلة حاسبة', path: '/calculator', icon: Calculator, color: 'bg-amber-500', desc: 'ذكية ومتطورة' },
-  { label: 'جدول الدراسة', path: '/schedule', icon: CalendarIcon, color: 'bg-emerald-500', desc: 'نظم وقتك بذكاء' },
+  { label: 'حل المسائل الذكي', path: '/solve', icon: HelpCircle, color: 'bg-blue-600', desc: 'صور أو اكتب مسألتك وخلي مصعب يحلها' },
+  { label: 'تحدي واختبارات', path: '/quiz', icon: BrainCircuit, color: 'bg-purple-600', desc: 'أسئلة نهفة وفشافشة مع تصحيح فوري' },
+  { label: 'الآلة الحاسبة المثلثية', path: '/calculator', icon: Calculator, color: 'bg-amber-600', desc: 'قيم دقيقة للزوايا وجيب وجتا وظا' },
+  { label: 'جدول دراسة التوجيهي', path: '/schedule', icon: CalendarIcon, color: 'bg-emerald-600', desc: 'نظم جدولك بدون تسويف وهبد' },
 ];
 
 export default function Home() {
@@ -32,115 +35,153 @@ export default function Home() {
   const quote = MATH_QUOTES[new Date().getDay() % MATH_QUOTES.length];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Hero Welcome */}
-      <section className="relative overflow-hidden rounded-3xl math-gradient p-8 text-white shadow-xl">
-        <div className="relative z-10 md:w-2/3">
+    <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
+      {/* Hero Welcome with Professor Mosaab Identity */}
+      <section className="relative overflow-hidden rounded-[32px] math-gradient p-6 sm:p-10 text-white shadow-xl">
+        <div className="relative z-10 md:w-2/3 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold">
+            <Sparkles size={14} className="text-amber-300" /> أكاديمية الأستاذ مصعب فشافشة للرياضيات
+          </div>
+
           <motion.h2 
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="text-3xl md:text-5xl font-black mb-4 leading-tight"
+            className="text-3xl sm:text-5xl font-black leading-tight"
           >
-            مرحباً بك في تطبيق <br />
-            الأستاذ مصعب الذكي 👋
+            يا هلا {user?.displayName ? `بالبطل ${user.displayName}` : 'بطلابنا الجدعان'}! 👋
           </motion.h2>
-          <p className="text-blue-100 text-lg mb-6 leading-relaxed">
-            أنا هنا لأجعل الرياضيات أسهل وأمتع بالنسبة لك. لنبدأ رحلة التفوق معاً!
+          
+          <p className="text-blue-100 text-base sm:text-lg leading-relaxed font-medium">
+            هون بتتعلم الرياضيات صح.. بدون لف ودوران وبدون هبد زي أكرم! حل مسائل، آلة حاسبة دقيقة، واختبارات فكاهية ترفع راسك!
           </p>
-          <div className="flex gap-4">
+
+          <div className="flex flex-wrap gap-3 pt-2">
             <Link 
               to="/solve" 
-              className="px-6 py-3 bg-white text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg"
+              className="px-6 py-3.5 bg-white text-blue-700 rounded-2xl font-black text-sm hover:bg-blue-50 transition-all shadow-lg hover:scale-105"
             >
-              ابدأ حل المسائل
+              ابدأ حل مسألة مع الأستاذ ✍️
+            </Link>
+            <Link 
+              to="/quiz" 
+              className="px-6 py-3.5 bg-blue-800/60 border border-white/30 text-white rounded-2xl font-bold text-sm hover:bg-blue-800 transition-all"
+            >
+              تحدي الكويز السريع ⚡
             </Link>
           </div>
         </div>
-        <div className="absolute top-1/2 -left-10 -translate-y-1/2 w-72 h-72 opacity-20 md:opacity-100 md:left-12">
-          <Mascot />
+        
+        <div className="absolute top-1/2 -left-6 -translate-y-1/2 w-64 h-64 opacity-25 md:opacity-100 md:left-8 pointer-events-none">
+          <Mascot emotion="happy" />
         </div>
       </section>
 
       {/* Stats Overview */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'المستوى', value: progress?.level || 1, icon: Star, color: 'text-amber-500' },
-          { label: 'نقاط XP', value: progress?.xp || 0, icon: Zap, color: 'text-purple-500' },
-          { label: 'مسائل محلولة', value: progress?.solvedCount || 0, icon: HelpCircle, color: 'text-blue-500' },
-          { label: 'أعلى سلسلة', value: progress?.streak || 0, icon: TrendingUp, color: 'text-emerald-500' },
+          { label: 'المستوى الحالي', value: progress?.level || 1, icon: Star, color: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'نقاط XP الفخر', value: progress?.xp || 25, icon: Zap, color: 'text-purple-500', bg: 'bg-purple-50' },
+          { label: 'مسائل تم حلها', value: progress?.solvedCount || 0, icon: HelpCircle, color: 'text-blue-500', bg: 'bg-blue-50' },
+          { label: 'سلسلة الالتزام', value: `${progress?.streak || 1} يوم 🔥`, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-            <div className={stat.color}>
-              <stat.icon size={24} />
+          <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3.5">
+            <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
+              <stat.icon size={22} />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stat.value}</p>
-              <p className="text-xs text-slate-500">{stat.label}</p>
+              <p className="text-xl sm:text-2xl font-black text-slate-800">{stat.value}</p>
+              <p className="text-xs text-slate-400 font-bold">{stat.label}</p>
             </div>
           </div>
         ))}
       </section>
 
-      {/* Quote of the day */}
-      <section className="bg-amber-50 border border-amber-100 p-6 rounded-2xl">
-        <div className="flex items-center gap-3 mb-2 text-amber-600">
-          <Star size={20} fill="currentColor" />
-          <h3 className="font-bold">حكمة اليوم الرياضية</h3>
+      {/* Quote of the day from Professor Mosaab */}
+      <section className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 p-6 rounded-3xl shadow-sm">
+        <div className="flex items-center gap-2 mb-2 text-amber-700 font-bold text-sm">
+          <Star size={18} fill="currentColor" />
+          <span>حكمة ونهفة اليوم من الأستاذ مصعب:</span>
         </div>
-        <p className="text-lg text-slate-700 italic font-medium">"{quote}"</p>
+        <p className="text-base sm:text-lg text-slate-800 font-bold leading-relaxed">
+          "{quote}"
+        </p>
       </section>
 
       {/* Quick Actions Grid */}
-      <section>
-        <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-          أدوات سريعة
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-        </h3>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+            أقسام وتحديات الأستاذ مصعب
+            <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
+          </h3>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {QUICK_ACTIONS.map((action, i) => (
             <Link 
               key={i} 
               to={action.path}
-              className="group bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all"
+              className="group bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex flex-col justify-between"
             >
-              <div className={`${action.color} w-12 h-12 rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform`}>
-                <action.icon size={24} />
+              <div>
+                <div className={`${action.color} w-12 h-12 rounded-2xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform shadow-md`}>
+                  <action.icon size={24} />
+                </div>
+                <h4 className="font-bold text-slate-800 text-lg mb-1 group-hover:text-blue-600 transition-colors">{action.label}</h4>
+                <p className="text-slate-500 text-xs font-medium leading-relaxed mb-4">{action.desc}</p>
               </div>
-              <h4 className="font-bold text-lg mb-1">{action.label}</h4>
-              <p className="text-slate-500 text-sm mb-4">{action.desc}</p>
-              <div className="flex items-center text-primary text-sm font-semibold gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                ادخل الآن <ChevronLeft size={16} />
+              <div className="flex items-center text-primary text-xs font-bold gap-1 group-hover:translate-x-[-4px] transition-transform">
+                افتح القسم <ChevronLeft size={16} />
               </div>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Recent Tasks / Lessons placeholder */}
-      <section className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-4">
-          <h3 className="text-xl font-bold mb-2">أحدث الدروس</h3>
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white p-4 rounded-xl border border-slate-100 flex items-center justify-between hover:bg-slate-50 cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center font-bold text-slate-600">
-                  {i}
-                </div>
-                <div>
-                  <h5 className="font-bold">المعادلات من الدرجة الثانية</h5>
-                  <p className="text-xs text-slate-500">الجبر - متقدم</p>
-                </div>
-              </div>
-              <ChevronLeft className="text-slate-300" />
+      {/* Funny Daily Challenge Card */}
+      <section className="grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
+              <BookOpen size={20} className="text-blue-600" />
+              قوانين ذهبية لازم تكون حافظها صم
+            </h3>
+            <Link to="/formulas" className="text-xs text-primary font-bold hover:underline">عرض الكل</Link>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <p className="text-xs font-bold text-blue-700 mb-1">الفرق بين مربعين</p>
+              <p className="text-sm font-mono font-bold text-slate-800" dir="ltr">س² - ص² = (س - ص)(س + ص)</p>
+              <p className="text-[11px] text-slate-400 mt-1">بتحللك نص مسائل التوجيهي!</p>
             </div>
-          ))}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <p className="text-xs font-bold text-blue-700 mb-1">متطابقة فيثاغورس المثلثية</p>
+              <p className="text-sm font-mono font-bold text-slate-800" dir="ltr">جا²(س) + جتا²(س) = 1</p>
+              <p className="text-[11px] text-slate-400 mt-1">ثابتة زي الجبل ما بتتغير!</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit">
-           <h3 className="font-bold mb-4">تحدي اليوم</h3>
-           <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-center space-y-3">
-              <p className="text-sm font-medium text-blue-800">ما هي مساحة مثلث طول قاعدته 10 سم وارتفاعه 5 سم؟</p>
-              <Link to="/solve" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold w-full">إرسال الحل (+20 XP)</Link>
-           </div>
+
+        <div className="bg-gradient-to-br from-blue-900 to-indigo-900 text-white p-6 rounded-3xl shadow-md flex flex-col justify-between space-y-4">
+          <div>
+            <div className="flex items-center gap-2 text-amber-400 text-xs font-bold mb-2">
+              <Award size={16} /> تحدي وسيم السريع
+            </div>
+            <h4 className="font-black text-lg">سؤال للي بفهموا بس! 🎯</h4>
+            <p className="text-blue-200 text-xs mt-2 leading-relaxed">
+              إذا كان جيب زاوية حادة جا(س) = 0.5، فما هي قيمة الزاوية س بالدرجات؟
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Link 
+              to="/calculator" 
+              className="block text-center py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-xl font-bold text-xs transition-colors shadow"
+            >
+              افتح الحاسبة وتأكد (30°)
+            </Link>
+          </div>
         </div>
       </section>
     </div>
